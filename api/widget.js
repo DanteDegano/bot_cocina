@@ -121,16 +121,19 @@ export default function handler(req, res) {
 
     // Crear el widget ChefBot
     function createChefBotWidget() {
+        console.log('🔧 Iniciando creación del widget ChefBot...');
+        
         // Verificar si ya existe el widget
         if (document.getElementById('chefbot-widget')) {
+            console.log('⚠️ Widget ya existe, saliendo...');
             return;
         }
-
-        const geminiService = new GeminiService();
 
         // Crear el contenedor principal
         const widgetContainer = document.createElement('div');
         widgetContainer.id = 'chefbot-widget';
+        
+        console.log('📦 Contenedor del widget creado');
         
         // Estilos del widget
         const styles = \`
@@ -148,6 +151,8 @@ export default function handler(req, res) {
                     top: 0;
                     left: 0;
                     z-index: 9999;
+                    visibility: visible !important;
+                    opacity: 1 !important;
                 }
 
                 .chef-panel {
@@ -397,6 +402,10 @@ export default function handler(req, res) {
         document.body.style.margin = '0';
         document.body.style.padding = '0';
         document.body.style.overflow = 'hidden';
+        document.body.style.fontFamily = 'Arial, sans-serif';
+        
+        // Limpiar el body antes de agregar el widget
+        document.body.innerHTML = '';
         document.body.appendChild(widgetContainer);
 
         // Referencias a elementos
