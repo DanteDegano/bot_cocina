@@ -1,4 +1,4 @@
-// ChefBot Widget - Sistema Completo Embebido
+// ChefBot Widget - Réplica exacta del index.html en formato flotante
 (function() {
   'use strict';
   
@@ -8,58 +8,63 @@
   }
   window.ChefBotWidgetLoaded = true;
 
-  // Configuración de la API Key (debes configurar esto)
-  const GEMINI_API_KEY = 'AIzaSyDhx-EVEQEJ9L2wQLwqVJaXOW7kXFXKYms'; // Reemplaza con tu API key
+  // Configuración de la API Key
+  const GEMINI_API_KEY = 'AIzaSyDhx-EVEQEJ9L2wQLwqVJaXOW7kXFXKYms';
 
-  // Servicio Gemini embebido
+  // Servicio Gemini embebido (simplificado)
   class GeminiService {
     constructor() {
       this.apiKey = GEMINI_API_KEY;
       this.model = null;
+      this.isReady = false;
       this.init();
     }
 
     async init() {
-      if (!this.apiKey) {
-        console.error('API key de Gemini no configurada');
-        return;
-      }
-      
       try {
-        // Cargar la librería de Google Generative AI dinámicamente
-        if (!window.GoogleGenerativeAI) {
-          await this.loadGeminiScript();
-        }
+        // Cargar la librería dinámicamente
+        await this.loadGeminiScript();
         
-        const { GoogleGenerativeAI } = window;
-        const genAI = new GoogleGenerativeAI(this.apiKey);
-        this.model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        console.log('✅ ChefBot inicializado correctamente');
+        if (window.GoogleGenerativeAI) {
+          const { GoogleGenerativeAI } = window;
+          const genAI = new GoogleGenerativeAI(this.apiKey);
+          this.model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          this.isReady = true;
+          console.log('✅ ChefBot Widget inicializado');
+        }
       } catch (error) {
-        console.error('❌ Error inicializando ChefBot:', error);
+        console.error('❌ Error inicializando ChefBot Widget:', error);
       }
     }
 
     async loadGeminiScript() {
       return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.type = 'importmap';
-        script.textContent = JSON.stringify({
-          "imports": {
-            "@google/generative-ai": "https://esm.run/@google/generative-ai"
-          }
-        });
-        document.head.appendChild(script);
+        if (window.GoogleGenerativeAI) {
+          resolve();
+          return;
+        }
 
-        const moduleScript = document.createElement('script');
-        moduleScript.type = 'module';
-        moduleScript.textContent = `
-          import { GoogleGenerativeAI } from "@google/generative-ai";
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.textContent = `
+          import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
           window.GoogleGenerativeAI = GoogleGenerativeAI;
+          window.geminiWidgetLoaded = true;
         `;
-        moduleScript.onload = resolve;
-        moduleScript.onerror = reject;
-        document.head.appendChild(moduleScript);
+        
+        script.onload = () => {
+          const checkLoaded = () => {
+            if (window.geminiWidgetLoaded && window.GoogleGenerativeAI) {
+              resolve();
+            } else {
+              setTimeout(checkLoaded, 100);
+            }
+          };
+          checkLoaded();
+        };
+        
+        script.onerror = reject;
+        document.head.appendChild(script);
       });
     }
 
@@ -87,8 +92,11 @@ Responde siempre como si fueras un chef experimentado que quiere enseñar y ayud
     }
 
     async sendMessage(message, conversationHistory = []) {
-      if (!this.model) {
-        throw new Error('ChefBot no está listo. Intenta de nuevo en unos segundos.');
+      if (!this.isReady || !this.model) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (!this.isReady || !this.model) {
+          throw new Error('ChefBot se está inicializando. Intenta de nuevo en unos segundos.');
+        }
       }
 
       try {
@@ -111,8 +119,8 @@ Responde siempre como si fueras un chef experimentado que quiere enseñar y ayud
         
         return text.trim();
       } catch (error) {
-        console.error('❌ Error al comunicarse con ChefBot:', error);
-        throw new Error('Error de conexión. Verifica tu internet e intenta de nuevo.');
+        console.error('❌ Error ChefBot Widget:', error);
+        throw new Error('Error de conexión. Intenta de nuevo.');
       }
     }
   }
@@ -126,76 +134,77 @@ Responde siempre como si fueras un chef experimentado que quiere enseñar y ayud
     const widgetContainer = document.createElement('div');
     widgetContainer.id = 'chefbot-widget';
     widgetContainer.innerHTML = `
-      <div id="chefbot-button">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" fill="white"/>
-          <!-- Chef Hat -->
-          <path d="M7 9 Q7 7 9 7 Q10 5 12 5 Q14 5 15 7 Q17 7 17 9 L17 10 Q17 11 16 11 L8 11 Q7 11 7 10 Z" fill="white" stroke="#333" stroke-width="0.5"/>
-          <path d="M8 10 L16 10 L15.5 12 L8.5 12 Z" fill="white" stroke="#333" stroke-width="0.5"/>
-          <!-- Face -->
-          <circle cx="12" cy="15" r="3" fill="#FDBCB4"/>
-          <!-- Eyes -->
-          <circle cx="11" cy="14" r="0.3" fill="#333"/>
-          <circle cx="13" cy="14" r="0.3" fill="#333"/>
-          <!-- Mouth -->
-          <path d="M11 16 Q12 16.5 13 16" stroke="#333" stroke-width="0.3" fill="none"/>
-        </svg>
+      <!-- Botón flotante -->
+      <div id="chefbot-floating-btn">
+        <div class="chef-avatar-small"></div>
       </div>
       
-      <div id="chefbot-chat" style="display: none;">
-        <div id="chefbot-header">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #FFD700;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M7 9 Q7 7 9 7 Q10 5 12 5 Q14 5 15 7 Q17 7 17 9 L17 10 Q17 11 16 11 L8 11 Q7 11 7 10 Z" fill="white" stroke="#333" stroke-width="0.5"/>
-                <path d="M8 10 L16 10 L15.5 12 L8.5 12 Z" fill="white" stroke="#333" stroke-width="0.5"/>
-                <circle cx="12" cy="15" r="3" fill="#FDBCB4"/>
-                <circle cx="11" cy="14" r="0.3" fill="#333"/>
-                <circle cx="13" cy="14" r="0.3" fill="#333"/>
-                <path d="M11 16 Q12 16.5 13 16" stroke="#333" stroke-width="0.3" fill="none"/>
-              </svg>
-            </div>
-            <div>
-              <div style="font-weight: bold; color: #333;">ChefBot</div>
-              <div style="font-size: 12px; color: #666;">Asistente de Cocina</div>
+      <!-- Ventana del chat (inicialmente oculta) -->
+      <div id="chefbot-window" style="display: none;">
+        <div class="main-container">
+          <!-- Panel del chef -->
+          <div class="chef-panel">
+            <div class="chef-avatar"></div>
+            <div class="chef-info">
+              <h1>ChefBot</h1>
+              <p class="chef-description">
+                Te ayudo a encontrar las mejores recetas de cocina.
+              </p>
+              <p class="chef-question">
+                ¿Qué querés cocinar hoy?
+              </p>
             </div>
           </div>
-          <button id="chefbot-close">×</button>
-        </div>
-        
-        <div id="chefbot-messages">
-          <div class="chefbot-message bot">
-            <div class="chefbot-message-content">
-              ¡Hola! 👨‍🍳 Soy ChefBot, tu asistente personal de cocina. Puedo ayudarte con recetas, técnicas culinarias, sustituciones de ingredientes y mucho más. ¿En qué puedo ayudarte hoy?
+
+          <!-- Chat Area -->
+          <div class="chat-area">
+            <div class="chat-container">
+              <div class="chat-messages" id="widget-chat-messages">
+                <!-- Los mensajes se agregarán aquí dinámicamente -->
+              </div>
+              
+              <div class="chat-input-area">
+                <div class="input-container">
+                  <textarea 
+                    class="chat-input" 
+                    id="widget-chat-input"
+                    placeholder="Pregúntame sobre recetas, técnicas de cocina o ingredientes..."
+                    rows="1"></textarea>
+                  <button class="send-button" id="widget-send-button">
+                    ➤
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="disclaimer">
+              Respuestas generadas por inteligencia artificial.<br>
+              Este chatbot está en etapa experimental y eventualmente puede presentar imprecisiones.
             </div>
           </div>
         </div>
         
-        <div id="chefbot-input-area">
-          <textarea id="chefbot-input" placeholder="Pregúntame sobre cocina..." rows="1"></textarea>
-          <button id="chefbot-send">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
-            </svg>
-          </button>
-        </div>
+        <!-- Botón de cerrar -->
+        <button id="chefbot-close-btn">×</button>
       </div>
     `;
 
-    // Estilos del widget
+    // Estilos del widget - EXACTAMENTE como index.html
     const styles = document.createElement('style');
     styles.textContent = `
+      /* Widget Container */
       #chefbot-widget {
         position: fixed;
         bottom: 20px;
         right: 20px;
         z-index: 10000;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
 
-      #chefbot-button {
-        width: 60px;
-        height: 60px;
+      /* Botón flotante */
+      #chefbot-floating-btn {
+        width: 70px;
+        height: 70px;
         background: linear-gradient(135deg, #FFD700, #FFA500);
         border-radius: 50%;
         display: flex;
@@ -207,154 +216,251 @@ Responde siempre como si fueras un chef experimentado que quiere enseñar y ayud
         border: 3px solid white;
       }
 
-      #chefbot-button:hover {
+      #chefbot-floating-btn:hover {
         transform: scale(1.1);
         box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6);
       }
 
-      #chefbot-chat {
+      .chef-avatar-small {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='95' fill='white'/%3E%3C!-- Chef Hat --%3E%3Cpath d='M60 80 Q60 60 80 60 Q90 45 100 45 Q110 45 120 60 Q140 60 140 80 L140 85 Q140 90 135 90 L65 90 Q60 90 60 85 Z' fill='white' stroke='%23333' stroke-width='2'/%3E%3Cpath d='M65 85 L135 85 L130 100 L70 100 Z' fill='white' stroke='%23333' stroke-width='2'/%3E%3C!-- Face --%3E%3Ccircle cx='100' cy='115' r='25' fill='%23FDBCB4'/%3E%3C!-- Eyes --%3E%3Ccircle cx='92' cy='108' r='2' fill='%23333'/%3E%3Ccircle cx='108' cy='108' r='2' fill='%23333'/%3E%3C!-- Nose --%3E%3Cpath d='M100 112 L102 115 L98 115 Z' fill='%23F4A582'/%3E%3C!-- Mouth --%3E%3Cpath d='M95 120 Q100 125 105 120' stroke='%23333' stroke-width='1.5' fill='none'/%3E%3C!-- Chef Coat --%3E%3Cpath d='M75 135 Q75 130 80 130 L120 130 Q125 130 125 135 L125 170 Q125 175 120 175 L80 175 Q75 175 75 170 Z' fill='white' stroke='%23333' stroke-width='2'/%3E%3C!-- Buttons --%3E%3Ccircle cx='100' cy='145' r='2' fill='%23333'/%3E%3Ccircle cx='100' cy='155' r='2' fill='%23333'/%3E%3Ccircle cx='100' cy='165' r='2' fill='%23333'/%3E%3C!-- Red Necktie --%3E%3Cpath d='M95 130 Q100 125 105 130 L103 140 Q100 145 97 140 Z' fill='%23e74c3c'/%3E%3C!-- Utensils --%3E%3Cpath d='M70 140 L75 135 L77 137 L72 142 Z' fill='%23666'/%3E%3Cpath d='M128 137 L123 142 L125 144 L130 139 Z' fill='%23666'/%3E%3Cpath d='M125 135 Q130 130 135 135 Q130 140 125 135' fill='%23666'/%3E%3C!-- Steam --%3E%3Cpath d='M140 125 Q142 120 144 125 Q146 120 148 125' stroke='%23ccc' stroke-width='1' fill='none'/%3E%3Cpath d='M145 130 Q147 125 149 130 Q151 125 153 130' stroke='%23ccc' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+        background-size: 80%;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      /* Ventana del widget */
+      #chefbot-window {
         position: absolute;
         bottom: 80px;
         right: 0;
-        width: 350px;
-        height: 500px;
-        background: white;
+        width: 850px;
+        height: 650px;
+        background: #f5f5f5;
         border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        display: flex;
-        flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         overflow: hidden;
+        padding: 20px;
       }
 
-      #chefbot-header {
-        background: linear-gradient(135deg, #FFD700, #FFA500);
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: white;
-      }
-
-      #chefbot-close {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
+      /* Botón de cerrar */
+      #chefbot-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
         width: 30px;
         height: 30px;
+        background: #ff4757;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+      }
+
+      #chefbot-close-btn:hover {
+        background: #ff3742;
+      }
+
+      /* ESTILOS EXACTOS DEL INDEX.HTML */
+      #chefbot-window * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Contenedor principal */
+      #chefbot-window .main-container {
+        max-width: 100%;
+        width: 100%;
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+        justify-content: center;
+        height: 100%;
+      }
+
+      /* Panel del chef */
+      #chefbot-window .chef-panel {
+        min-width: 250px;
+      }
+
+      #chefbot-window .chef-avatar {
+        width: 80px;
+        height: 80px;
+        background: white;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 3px solid #FFD700;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='95' fill='white'/%3E%3C!-- Chef Hat --%3E%3Cpath d='M60 80 Q60 60 80 60 Q90 45 100 45 Q110 45 120 60 Q140 60 140 80 L140 85 Q140 90 135 90 L65 90 Q60 90 60 85 Z' fill='white' stroke='%23333' stroke-width='2'/%3E%3Cpath d='M65 85 L135 85 L130 100 L70 100 Z' fill='white' stroke='%23333' stroke-width='2'/%3E%3C!-- Face --%3E%3Ccircle cx='100' cy='115' r='25' fill='%23FDBCB4'/%3E%3C!-- Eyes --%3E%3Ccircle cx='92' cy='108' r='2' fill='%23333'/%3E%3Ccircle cx='108' cy='108' r='2' fill='%23333'/%3E%3C!-- Nose --%3E%3Cpath d='M100 112 L102 115 L98 115 Z' fill='%23F4A582'/%3E%3C!-- Mouth --%3E%3Cpath d='M95 120 Q100 125 105 120' stroke='%23333' stroke-width='1.5' fill='none'/%3E%3C!-- Chef Coat --%3E%3Cpath d='M75 135 Q75 130 80 130 L120 130 Q125 130 125 135 L125 170 Q125 175 120 175 L80 175 Q75 175 75 170 Z' fill='white' stroke='%23333' stroke-width='2'/%3E%3C!-- Buttons --%3E%3Ccircle cx='100' cy='145' r='2' fill='%23333'/%3E%3Ccircle cx='100' cy='155' r='2' fill='%23333'/%3E%3Ccircle cx='100' cy='165' r='2' fill='%23333'/%3E%3C!-- Red Necktie --%3E%3Cpath d='M95 130 Q100 125 105 130 L103 140 Q100 145 97 140 Z' fill='%23e74c3c'/%3E%3C!-- Utensils --%3E%3Cpath d='M70 140 L75 135 L77 137 L72 142 Z' fill='%23666'/%3E%3Cpath d='M128 137 L123 142 L125 144 L130 139 Z' fill='%23666'/%3E%3Cpath d='M125 135 Q130 130 135 135 Q130 140 125 135' fill='%23666'/%3E%3C!-- Steam --%3E%3Cpath d='M140 125 Q142 120 144 125 Q146 120 148 125' stroke='%23ccc' stroke-width='1' fill='none'/%3E%3Cpath d='M145 130 Q147 125 149 130 Q151 125 153 130' stroke='%23ccc' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+        background-size: 80%;
+        background-repeat: no-repeat;
+        background-position: center;
       }
 
-      #chefbot-close:hover {
-        background: rgba(255,255,255,0.2);
+      #chefbot-window .chef-info h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 8px;
       }
 
-      #chefbot-messages {
+      #chefbot-window .chef-description {
+        color: #666;
+        margin-bottom: 15px;
+        line-height: 1.5;
+        font-size: 14px;
+      }
+
+      #chefbot-window .chef-question {
+        color: #333;
+        font-weight: 500;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
+
+      /* Chat container */
+      #chefbot-window .chat-area {
+        flex: 1;
+        max-width: 550px;
+      }
+
+      #chefbot-window .chat-container {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        height: 550px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #chefbot-window .chat-messages {
         flex: 1;
         padding: 20px;
         overflow-y: auto;
         background: #f8f9fa;
       }
 
-      .chefbot-message {
-        margin-bottom: 15px;
+      /* Estilos de mensajes tipo tarjeta - EXACTOS */
+      #chefbot-window .message-card {
+        margin-bottom: 20px;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      #chefbot-window .message-card.user {
         display: flex;
-        flex-direction: column;
+        justify-content: flex-end;
       }
 
-      .chefbot-message.user {
-        align-items: flex-end;
+      #chefbot-window .message-card.bot {
+        display: flex;
+        justify-content: flex-start;
       }
 
-      .chefbot-message.bot {
-        align-items: flex-start;
-      }
-
-      .chefbot-message-content {
+      #chefbot-window .message-content {
         max-width: 80%;
-        padding: 12px 16px;
-        border-radius: 18px;
-        line-height: 1.4;
-        font-size: 14px;
+        padding: 20px;
+        border-radius: 20px;
+        position: relative;
       }
 
-      .chefbot-message.user .chefbot-message-content {
-        background: #007bff;
+      #chefbot-window .message-card.user .message-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border-bottom-right-radius: 4px;
+        border-bottom-right-radius: 5px;
       }
 
-      .chefbot-message.bot .chefbot-message-content {
-        background: white;
+      #chefbot-window .message-card.bot .message-content {
+        background: #FFD700;
         color: #333;
-        border: 1px solid #e0e0e0;
-        border-bottom-left-radius: 4px;
+        border-bottom-left-radius: 5px;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
       }
 
-      #chefbot-input-area {
-        padding: 15px;
+      /* Input area - EXACTO */
+      #chefbot-window .chat-input-area {
+        padding: 20px;
         background: white;
         border-top: 1px solid #e0e0e0;
         display: flex;
-        gap: 10px;
+        gap: 15px;
         align-items: flex-end;
       }
 
-      #chefbot-input {
+      #chefbot-window .input-container {
         flex: 1;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        padding: 10px 15px;
-        font-size: 14px;
+        position: relative;
+      }
+
+      #chefbot-window .chat-input {
+        width: 100%;
+        min-height: 50px;
+        padding: 15px 50px 15px 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 16px;
         resize: none;
-        max-height: 100px;
+        outline: none;
+        transition: border-color 0.3s ease;
         font-family: inherit;
       }
 
-      #chefbot-input:focus {
-        outline: none;
+      #chefbot-window .chat-input:focus {
         border-color: #FFD700;
       }
 
-      #chefbot-send {
+      #chefbot-window .send-button {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-54%);
         width: 40px;
         height: 40px;
-        background: #FFD700;
+        background: transparent;
         border: none;
-        border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #333;
         transition: all 0.3s ease;
+        color: #666;
+        font-size: 18px;
+        font-weight: bold;
       }
 
-      #chefbot-send:hover {
-        background: #FFA500;
-        transform: scale(1.1);
+      #chefbot-window .send-button:hover {
+        color: #333;
       }
 
-      #chefbot-send:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
+      #chefbot-window .disclaimer {
+        text-align: center;
+        padding: 15px;
+        color: #999;
+        font-size: 12px;
+        background: #f8f9fa;
       }
 
-      @media (max-width: 480px) {
-        #chefbot-chat {
-          width: 320px;
-          height: 450px;
-          right: -10px;
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-        
-        #chefbot-widget {
-          right: 10px;
-          bottom: 10px;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
 
@@ -367,28 +473,32 @@ Responde siempre como si fueras un chef experimentado que quiere enseñar y ayud
         }
       }
 
-      .chefbot-loading {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+      /* Responsive */
+      @media (max-width: 900px) {
+        #chefbot-window {
+          width: calc(100vw - 40px);
+          height: calc(100vh - 100px);
+          right: 20px;
+          bottom: 80px;
+        }
+        
+        #chefbot-window .main-container {
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+        }
+        
+        #chefbot-window .chef-panel {
+          min-width: auto;
+          text-align: center;
+          width: 100%;
+        }
+        
+        #chefbot-window .chat-container {
+          height: 400px;
+          width: 100%;
+        }
       }
-
-      .chefbot-loading-dots {
-        display: flex;
-        gap: 3px;
-      }
-
-      .chefbot-loading-dot {
-        width: 6px;
-        height: 6px;
-        background: #333;
-        border-radius: 50%;
-        animation: bounce 1.4s ease-in-out infinite both;
-      }
-
-      .chefbot-loading-dot:nth-child(1) { animation-delay: -0.32s; }
-      .chefbot-loading-dot:nth-child(2) { animation-delay: -0.16s; }
-      .chefbot-loading-dot:nth-child(3) { animation-delay: 0s; }
     `;
 
     document.head.appendChild(styles);
@@ -399,115 +509,138 @@ Responde siempre como si fueras un chef experimentado que quiere enseñar y ayud
     let isOpen = false;
 
     // Elementos del DOM
-    const button = document.getElementById('chefbot-button');
-    const chat = document.getElementById('chefbot-chat');
-    const closeBtn = document.getElementById('chefbot-close');
-    const messages = document.getElementById('chefbot-messages');
-    const input = document.getElementById('chefbot-input');
-    const sendBtn = document.getElementById('chefbot-send');
+    const floatingBtn = document.getElementById('chefbot-floating-btn');
+    const chatWindow = document.getElementById('chefbot-window');
+    const closeBtn = document.getElementById('chefbot-close-btn');
+    const chatMessages = document.getElementById('widget-chat-messages');
+    const chatInput = document.getElementById('widget-chat-input');
+    const sendButton = document.getElementById('widget-send-button');
 
-    // Funciones del chat
+    // Mensaje de bienvenida - EXACTO como index.html
+    function addWelcomeMessage() {
+      addMessage('¡Hola! 👋 Soy ChefBot, tu asistente personal de cocina. Puedo ayudarte con recetas, técnicas culinarias, sustituciones de ingredientes y consejos de cocina. ¿En qué puedo ayudarte hoy?', 'bot');
+    }
+
+    // Funciones del chat - EXACTAS como index.html
     function addMessage(content, type) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `chefbot-message ${type}`;
-      messageDiv.innerHTML = `
-        <div class="chefbot-message-content">${content}</div>
+      const messageCard = document.createElement('div');
+      messageCard.className = `message-card ${type}`;
+      
+      messageCard.innerHTML = `
+        <div class="message-content">
+          ${content}
+        </div>
       `;
-      messages.appendChild(messageDiv);
-      messages.scrollTop = messages.scrollHeight;
+      
+      chatMessages.appendChild(messageCard);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function addLoadingMessage() {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'chefbot-message bot';
-      messageDiv.id = 'chefbot-loading';
-      messageDiv.innerHTML = `
-        <div class="chefbot-message-content">
-          <div class="chefbot-loading">
+      const messageCard = document.createElement('div');
+      messageCard.className = 'message-card bot';
+      messageCard.id = 'loading-message';
+      messageCard.innerHTML = `
+        <div class="message-content">
+          <div style="display: flex; align-items: center; gap: 10px;">
             ChefBot está cocinando una respuesta
-            <div class="chefbot-loading-dots">
-              <div class="chefbot-loading-dot"></div>
-              <div class="chefbot-loading-dot"></div>
-              <div class="chefbot-loading-dot"></div>
+            <div style="display: flex; gap: 3px;">
+              <div style="width: 6px; height: 6px; background: #333; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both;"></div>
+              <div style="width: 6px; height: 6px; background: #333; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both; animation-delay: -0.16s;"></div>
+              <div style="width: 6px; height: 6px; background: #333; border-radius: 50%; animation: bounce 1.4s ease-in-out infinite both; animation-delay: -0.32s;"></div>
             </div>
           </div>
         </div>
       `;
-      messages.appendChild(messageDiv);
-      messages.scrollTop = messages.scrollHeight;
+      chatMessages.appendChild(messageCard);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function removeLoadingMessage() {
-      const loading = document.getElementById('chefbot-loading');
-      if (loading) loading.remove();
+      const loadingMessage = document.getElementById('loading-message');
+      if (loadingMessage) {
+        loadingMessage.remove();
+      }
     }
 
     async function sendMessage() {
-      const message = input.value.trim();
+      const message = chatInput.value.trim();
       if (!message) return;
 
+      // Agregar mensaje del usuario
       addMessage(message, 'user');
-      input.value = '';
-      sendBtn.disabled = true;
+      chatInput.value = '';
+
+      // Agregar mensaje de carga
       addLoadingMessage();
 
       try {
+        // Enviar a Gemini
         const response = await geminiService.sendMessage(message, conversationHistory);
+        
+        // Remover mensaje de carga
         removeLoadingMessage();
+        
+        // Agregar respuesta del bot
         addMessage(response, 'bot');
         
+        // Actualizar historial
         conversationHistory.push(
           { role: 'user', content: message },
           { role: 'bot', content: response }
         );
         
+        // Mantener solo los últimos 6 mensajes en el historial
         if (conversationHistory.length > 6) {
           conversationHistory = conversationHistory.slice(-6);
         }
+        
       } catch (error) {
         removeLoadingMessage();
         addMessage('Lo siento, no pude procesar tu mensaje. Por favor, intenta de nuevo.', 'bot');
         console.error('Error:', error);
-      } finally {
-        sendBtn.disabled = false;
       }
     }
 
     // Event listeners
-    button.addEventListener('click', () => {
+    floatingBtn.addEventListener('click', () => {
       if (isOpen) {
-        chat.style.display = 'none';
+        chatWindow.style.display = 'none';
         isOpen = false;
       } else {
-        chat.style.display = 'flex';
+        chatWindow.style.display = 'block';
         isOpen = true;
-        input.focus();
+        if (conversationHistory.length === 0) {
+          addWelcomeMessage();
+        }
+        chatInput.focus();
       }
     });
 
     closeBtn.addEventListener('click', () => {
-      chat.style.display = 'none';
+      chatWindow.style.display = 'none';
       isOpen = false;
     });
 
-    sendBtn.addEventListener('click', sendMessage);
+    sendButton.addEventListener('click', sendMessage);
 
-    input.addEventListener('keypress', (e) => {
+    chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
       }
     });
 
-    input.addEventListener('input', function() {
+    // Auto-resize textarea - EXACTO como index.html
+    chatInput.addEventListener('input', function() {
       this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
 
     // Cerrar al hacer clic fuera
     document.addEventListener('click', (e) => {
       if (isOpen && !widgetContainer.contains(e.target)) {
-        chat.style.display = 'none';
+        chatWindow.style.display = 'none';
         isOpen = false;
       }
     });
