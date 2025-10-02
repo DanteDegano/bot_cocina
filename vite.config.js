@@ -10,8 +10,6 @@ export default defineConfig({
         main: './index.html',
         central: './central.html'
       },
-      // Excluir widget.js del build - se servirá como estático
-      external: ['./widget.js'],
       output: {
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',

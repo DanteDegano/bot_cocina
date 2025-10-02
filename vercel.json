@@ -8,11 +8,6 @@
       }
     }
   ],
-  "functions": {
-    "widget.js": {
-      "includeFiles": "widget.js"
-    }
-  },
   "headers": [
     {
       "source": "/widget.js",
