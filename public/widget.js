@@ -9,7 +9,7 @@
   window.ChefBotWidgetLoaded = true;
 
   // Configuración de la API Key
-  const GEMINI_API_KEY = 'AIzaSyDhx-EVEQEJ9L2wQLwqVJaXOW7kXFXKYms';
+  const GEMINI_API_KEY = 'AIzaSyCgmDFHK2cmIQJc1friGaSPYJrpKrEsVTM';
 
   // Servicio Gemini embebido (simplificado y más robusto)
   class GeminiService {
