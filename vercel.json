@@ -6,6 +6,16 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/widget.js",
+      "dest": "/api/widget.js"
     }
   ],
   "headers": [
