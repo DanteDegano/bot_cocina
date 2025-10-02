@@ -6,8 +6,8 @@ export default function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Obtener la API key desde las variables de entorno o archivo de producción
-  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || 'AIzaSyCgmDFHK2cmIQJc1friGaSPYJrpKrEsVTM';
+  // Obtener la API key desde las variables de entorno o usar la que funciona en localhost
+  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || 'AIzaSyCgmDFHK2cmIOJclfr1GaSPYJrpKrEsVTM';
 
   if (!apiKey) {
     return res.status(500).send('// Error: API key no configurada en el servidor');
