@@ -137,13 +137,17 @@ export default function handler(req, res) {
             <style>
                 #chefbot-widget {
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    width: 100%;
+                    width: 100vw;
                     height: 100vh;
                     display: flex;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     margin: 0;
                     padding: 0;
                     box-sizing: border-box;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    z-index: 9999;
                 }
 
                 .chef-panel {
@@ -158,6 +162,7 @@ export default function handler(req, res) {
                     padding: 2rem;
                     margin: 2rem 0 2rem 2rem;
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                    min-width: 300px;
                 }
 
                 .chef-avatar {
@@ -195,6 +200,8 @@ export default function handler(req, res) {
                     border-radius: 20px;
                     overflow: hidden;
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                    min-width: 400px;
+                    max-width: 800px;
                 }
 
                 .chat-header {
@@ -387,6 +394,9 @@ export default function handler(req, res) {
         widgetContainer.innerHTML = html;
 
         // Agregar el widget al body
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.overflow = 'hidden';
         document.body.appendChild(widgetContainer);
 
         // Referencias a elementos
