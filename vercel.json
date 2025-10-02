@@ -8,6 +8,11 @@
       }
     }
   ],
+  "functions": {
+    "widget.js": {
+      "includeFiles": "widget.js"
+    }
+  },
   "headers": [
     {
       "source": "/widget.js",
@@ -41,10 +46,6 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/widget.js",
-      "destination": "/public/widget.js"
-    },
     {
       "source": "/widget",
       "destination": "/widget.html"

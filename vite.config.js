@@ -8,31 +8,23 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
-        widget: './widget.html',
         central: './central.html'
       },
+      // Excluir widget.js del build - se servirá como estático
+      external: ['./widget.js'],
       output: {
-        entryFileNames: (chunkInfo) => {
-          return chunkInfo.name === 'widget' ? 'widget.js' : 'assets/[name]-[hash].js'
-        },
-        chunkFileNames: (chunkInfo) => {
-          if (chunkInfo.facadeModuleId && chunkInfo.facadeModuleId.includes('widget')) {
-            return 'widget-[hash].js'
-          }
-          return 'assets/[name]-[hash].js'
-        },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name && assetInfo.name.includes('chatbot')) {
-            return 'widget-styles-[hash][extname]'
-          }
-          return 'assets/[name]-[hash][extname]'
-        }
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]'
       }
     },
     target: 'es2015',
     minify: true,
-    sourcemap: false
+    sourcemap: false,
+    // Copiar widget.js como archivo estático
+    copyPublicDir: true
   },
+  publicDir: 'public', // Habilitar el directorio public para archivos estáticos
   define: {
     'process.env': {},
     '__WIDGET_VERSION__': JSON.stringify('1.0.0'),
