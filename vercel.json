@@ -70,22 +70,10 @@
       ]
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/widget.js",
-      "dest": "/widget.js"
-    },
-    {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "/$1"
-    },
-    {
-      "src": "/widget",
-      "dest": "/widget.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index-app.html"
+      "source": "/widget",
+      "destination": "/widget.html"
     }
   ]
 }
