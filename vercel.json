@@ -19,6 +19,10 @@
         {
           "key": "Content-Type",
           "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     },
@@ -38,12 +42,12 @@
   ],
   "rewrites": [
     {
-      "source": "/widget",
-      "destination": "/widget.html"
+      "source": "/widget.js",
+      "destination": "/public/widget.js"
     },
     {
-      "source": "/((?!api/.*).*)",
-      "destination": "/index.html"
+      "source": "/widget",
+      "destination": "/widget.html"
     }
   ]
 }
