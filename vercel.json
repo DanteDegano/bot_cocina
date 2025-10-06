@@ -1,14 +1,15 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/chat.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/widget",
       "destination": "/widget.html"
-    },
-    {
-      "source": "/api/chat",
-      "destination": "/api/chat.js"
     },
     {
       "source": "/widget.js",
