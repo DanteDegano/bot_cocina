@@ -1,4 +1,5 @@
 {
+  "version": 3,
   "rewrites": [
     {
       "source": "/widget",
@@ -7,6 +8,10 @@
     {
       "source": "/widget.js",
       "destination": "/widget.js"
+    },
+    {
+      "source": "/chefbot.js",
+      "destination": "/chefbot.js"
     }
   ],
   "headers": [
@@ -19,16 +24,16 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
+          "value": "GET, POST, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
+          "value": "Content-Type, Authorization, X-Requested-With"
         }
       ]
     },
     {
-      "source": "/chefbot.js",
+      "source": "/widget.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
@@ -45,7 +50,7 @@
       ]
     },
     {
-      "source": "/widget.js",
+      "source": "/chefbot.js",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
