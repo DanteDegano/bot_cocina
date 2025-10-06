@@ -2,7 +2,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 module.exports = async function handler(req, res) {
   console.log(`🌐 Request method: ${req.method}, URL: ${req.url}`);
-  
+
   // Headers CORS para permitir embebido desde cualquier dominio
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
@@ -30,7 +30,7 @@ module.exports = async function handler(req, res) {
 
     // Obtener API key de variables de entorno
     const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-    
+
     if (!apiKey) {
       console.error('❌ API key no encontrada en variables de entorno');
       return res.status(500).json({ error: 'Servicio no configurado' });
@@ -38,7 +38,7 @@ module.exports = async function handler(req, res) {
 
     // Inicializar Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       generationConfig: {
         temperature: 0.7,
@@ -47,6 +47,21 @@ module.exports = async function handler(req, res) {
         maxOutputTokens: 1000,
       }
     });
+
+    // Verificar permisos para el modelo
+    try {
+      console.log('🔍 Verificando permisos para gemini-1.5-flash...');
+      const testPrompt = 'Verifica acceso al modelo Gemini.';
+      const testResult = await model.generateContent(testPrompt);
+      await testResult.response; // Si falla, cae en catch
+      console.log('✅ Permiso para gemini-1.5-flash confirmado');
+    } catch (permError) {
+      console.error('❌ No se puede acceder al modelo gemini-1.5-flash:', permError.message);
+      return res.status(403).json({
+        error: 'API key no tiene permisos para gemini-1.5-flash',
+        details: permError.message
+      });
+    }
 
     // Prompt específico para cocina
     const systemPrompt = `Eres ChefBot, un asistente experto de cocina. Ayuda con recetas, técnicas culinarias, sustitutos de ingredientes y consejos de cocina. 
@@ -71,37 +86,37 @@ Respuesta de ChefBot:`;
 
     console.log('✅ Respuesta generada exitosamente');
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       reply: reply,
-      success: true 
+      success: true
     });
 
   } catch (error) {
     console.error('❌ Error en /api/chat:', error);
-    
+
     // Manejar errores específicos de Gemini
     if (error.message?.includes('API_KEY_INVALID')) {
-      return res.status(500).json({ 
-        error: 'Error de configuración del servicio de IA',
-        details: 'API key inválida' 
+      return res.status(401).json({
+        error: 'API key inválida',
+        details: error.message
       });
     }
 
     if (error.message?.includes('RATE_LIMIT')) {
-      return res.status(429).json({ 
-        error: 'Demasiadas consultas. Intenta de nuevo en unos momentos.' 
+      return res.status(429).json({
+        error: 'Demasiadas consultas. Intenta de nuevo en unos momentos.'
       });
     }
 
     if (error.message?.includes('SAFETY')) {
-      return res.status(400).json({ 
-        error: 'La consulta no cumple con las políticas de seguridad. Intenta reformular tu pregunta.' 
+      return res.status(400).json({
+        error: 'La consulta no cumple con las políticas de seguridad. Intenta reformular tu pregunta.'
       });
     }
 
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Error temporal procesando tu consulta. Intenta de nuevo.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-}
+};

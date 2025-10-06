@@ -10,8 +10,7 @@ if (window.ChefBotLoaded) {
   class ChatService {
     constructor() {
       this.isReady = true;
-      // Usar la URL base de Vercel para el endpoint
-      this.baseUrl = 'https://bot-cocina.vercel.app';
+      this.baseUrl = window.location.origin;
       this.conversationHistory = [];
     }
 
