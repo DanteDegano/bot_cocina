@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo - Embeber ChefBot Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .embed-example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #007bff;
+        }
+        .widget-container {
+            margin: 20px 0;
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            min-height: 200px;
+        }
+        .load-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .load-btn:hover {
+            background: #218838;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 Ejemplo de Embebido de ChefBot Widget</h1>
+        
+        <p>Este es un ejemplo de cómo embeber el ChefBot widget desde un dominio externo o localhost.</p>
+        
+        <div class="embed-example">
+            <h3>📝 Código para embeber:</h3>
+            <pre><code>&lt;script src="https://bot-cocina-git-master-dantedeganos-projects.vercel.app/widget.js"&gt;&lt;/script&gt;</code></pre>
+            
+            <p><strong>O desde localhost para pruebas:</strong></p>
+            <pre><code>&lt;script src="http://localhost:5173/widget.js"&gt;&lt;/script&gt;</code></pre>
+        </div>
+
+        <div class="widget-container" id="widget-area">
+            <p>👆 Haz clic en el botón para cargar el ChefBot widget</p>
+            <button class="load-btn" onclick="loadWidget()">🚀 Cargar ChefBot Widget</button>
+        </div>
+
+        <div class="embed-example">
+            <h3>🔧 Características del widget:</h3>
+            <ul>
+                <li>✅ <strong>CORS habilitado</strong> - Funciona desde cualquier dominio</li>
+                <li>✅ <strong>API segura</strong> - Gemini llamado desde backend</li>
+                <li>✅ <strong>Diseño TuChef</strong> - Interfaz profesional</li>
+                <li>✅ <strong>Responsive</strong> - Se adapta a dispositivos móviles</li>
+                <li>✅ <strong>Fallback</strong> - Respuestas demo si falla conexión</li>
+            </ul>
+        </div>
+
+        <div class="embed-example">
+            <h3>🌐 Dominios compatibles:</h3>
+            <ul>
+                <li>✅ <code>localhost</code> (desarrollo local)</li>
+                <li>✅ <code>127.0.0.1</code> (IP local)</li>
+                <li>✅ Cualquier dominio HTTPS</li>
+                <li>✅ Cualquier dominio HTTP (desarrollo)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function loadWidget() {
+            const widgetArea = document.getElementById('widget-area');
+            widgetArea.innerHTML = '<p>🔄 Cargando ChefBot widget...</p>';
+            
+            // Crear script tag dinámicamente
+            const script = document.createElement('script');
+            
+            // Detectar si estamos en localhost para usar URL local o producción
+            const isLocalhost = window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1' ||
+                               window.location.hostname === '';
+            
+            if (isLocalhost) {
+                script.src = 'http://localhost:5173/widget.js';
+            } else {
+                script.src = 'https://bot-cocina-git-master-dantedeganos-projects.vercel.app/widget.js';
+            }
+            
+            script.onload = function() {
+                console.log('✅ ChefBot widget cargado exitosamente');
+            };
+            
+            script.onerror = function() {
+                widgetArea.innerHTML = `
+                    <p>❌ Error cargando el widget</p>
+                    <p>Verifica que el servidor esté funcionando:</p>
+                    <ul>
+                        <li>Local: <code>npm run dev</code> en el proyecto</li>
+                        <li>Producción: Vercel deployment activo</li>
+                    </ul>
+                `;
+            };
+            
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+</html>
