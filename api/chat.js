@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default async function handler(req, res) {
+  console.log(`🌐 Request method: ${req.method}, URL: ${req.url}`);
+  
   // Headers CORS para permitir embebido desde cualquier dominio
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
@@ -9,11 +11,13 @@ export default async function handler(req, res) {
 
   // Manejar preflight OPTIONS
   if (req.method === 'OPTIONS') {
+    console.log('✅ Handling OPTIONS preflight request');
     return res.status(200).end();
   }
 
   // Solo permitir POST para el chat
   if (req.method !== 'POST') {
+    console.log(`❌ Method ${req.method} not allowed`);
     return res.status(405).json({ error: 'Método no permitido' });
   }
 

@@ -19,11 +19,15 @@ if (window.ChefBotLoaded) {
         const response = await fetch(this.baseUrl + '/api/chat', {
           method: 'OPTIONS'
         });
-        console.log('✅ Endpoint de chat disponible');
-        return true;
+        if (response.ok) {
+          console.log('✅ Endpoint de chat disponible');
+          return true;
+        } else {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
       } catch (error) {
-        console.warn('⚠️ Endpoint de chat no disponible, usando modo demo');
-        return true;
+        console.error('❌ Error conectando con backend:', error);
+        throw new Error('Backend no disponible. Verifica la conexión.');
       }
     }
 
@@ -50,18 +54,8 @@ if (window.ChefBotLoaded) {
         return data.reply || 'Respuesta vacía del servidor';
         
       } catch (error) {
-        console.warn('⚠️ Error conectando con backend, usando respuesta demo:', error);
-        
-        const demoResponses = [
-          "🍳 ¡Excelente pregunta! Para esa receta te recomiendo usar ingredientes frescos y seguir estos pasos: 1) Preparar todos los ingredientes, 2) Calentar la sartén a fuego medio, 3) Cocinar paso a paso sin apresurarse.",
-          "👨‍🍳 Como chef experto, puedo decirte que la clave está en la temperatura y el tiempo de cocción. Para obtener mejores resultados, siempre precalienta bien el equipo de cocina.",
-          "🥘 Una técnica que siempre funciona es preparar todos los ingredientes antes de empezar a cocinar (mise en place). Esto te permitirá concentrarte en la técnica sin preocuparte por los ingredientes.",
-          "🍽️ Te sugiero una deliciosa receta que combina sabores tradicionales con un toque moderno. La clave está en equilibrar los sabores: dulce, salado, ácido y umami.",
-          "🔥 El secreto está en el punto de cocción perfecto. Para carnes: usa un termómetro, para vegetales: que mantengan un poco de textura, para salsas: reduce a fuego lento."
-        ];
-        
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-        return demoResponses[Math.floor(Math.random() * demoResponses.length)];
+        console.error('❌ Error enviando mensaje al backend:', error);
+        throw error; // Propagar el error para manejarlo en la UI
       }
     }
   }
@@ -371,8 +365,19 @@ if (window.ChefBotLoaded) {
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
     
-    // Mensaje de bienvenida
-    addMessage('¡Hola! 👋 Soy ChefBot, tu asistente personal de cocina. Puedo ayudarte con recetas, técnicas culinarias, sustituciones de ingredientes y consejos de cocina. ¿En qué puedo ayudarte hoy?', 'bot');
+    // Inicializar servicio de chat
+    try {
+      await chatService.initialize();
+      // Mensaje de bienvenida
+      addMessage('¡Hola! 👋 Soy ChefBot, tu asistente personal de cocina. Puedo ayudarte con recetas, técnicas culinarias, sustituciones de ingredientes y consejos de cocina. ¿En qué puedo ayudarte hoy?', 'bot');
+    } catch (error) {
+      addMessage('❌ Error de conexión: No se pudo conectar con el servidor. Por favor, verifica tu conexión a internet e intenta recargar la página.', 'bot');
+      console.error('Error inicializando chat service:', error);
+      // Deshabilitar input si no hay conexión
+      chatInput.disabled = true;
+      sendButton.disabled = true;
+      return;
+    }
     
     // Configurar eventos
     sendButton.addEventListener('click', sendMessage);
@@ -471,8 +476,21 @@ if (window.ChefBotLoaded) {
         
     } catch (error) {
         removeLoadingMessage();
-        addMessage('Lo siento, no pude procesar tu mensaje. Por favor, intenta de nuevo.', 'bot');
-        console.error('Error:', error);
+        
+        let errorMessage = 'Lo siento, hubo un problema procesando tu mensaje. ';
+        
+        if (error.message?.includes('405')) {
+            errorMessage += 'El servidor no acepta este tipo de solicitud. Contacta al administrador.';
+        } else if (error.message?.includes('500')) {
+            errorMessage += 'Error interno del servidor. Intenta de nuevo en unos momentos.';
+        } else if (error.message?.includes('Network') || error.message?.includes('fetch')) {
+            errorMessage += 'Problema de conexión. Verifica tu internet e intenta de nuevo.';
+        } else {
+            errorMessage += 'Intenta de nuevo en unos momentos.';
+        }
+        
+        addMessage('❌ ' + errorMessage, 'bot');
+        console.error('Error en sendMessage:', error);
     }
   }
   
