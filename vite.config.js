@@ -1,9 +1,28 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { copyFileSync, mkdirSync } from 'fs'
+import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // Plugin personalizado para copiar widget.js
+    {
+      name: 'copy-widget',
+      writeBundle() {
+        try {
+          // Asegurar que existe el directorio dist
+          mkdirSync('./dist', { recursive: true });
+          // Copiar widget.js a dist
+          copyFileSync('./widget.js', './dist/widget.js');
+          console.log('✅ widget.js copiado a dist/');
+        } catch (error) {
+          console.warn('⚠️ Error copiando widget.js:', error.message);
+        }
+      }
+    }
+  ],
   build: {
     rollupOptions: {
       input: {
@@ -18,11 +37,8 @@ export default defineConfig({
     },
     target: 'es2015',
     minify: true,
-    sourcemap: false,
-    // Copiar widget.js como archivo estático
-    copyPublicDir: true
+    sourcemap: false
   },
-  publicDir: 'public', // Habilitar el directorio public para archivos estáticos
   define: {
     'process.env': {},
     '__WIDGET_VERSION__': JSON.stringify('1.0.0'),

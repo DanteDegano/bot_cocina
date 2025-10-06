@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo - ChefBot Widget CORS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 ChefBot Widget - Ejemplo CORS</h1>
+        <p>Esta página demuestra cómo integrar el widget de ChefBot desde un dominio externo.</p>
+        
+        <div class="example">
+            <h3>📝 Método 1: Script directo</h3>
+            <p>Cargar el widget usando el script JavaScript:</p>
+            <code>&lt;script src="https://tu-dominio.vercel.app/widget.js"&gt;&lt;/script&gt;</code>
+        </div>
+
+        <div class="example">
+            <h3>🖼️ Método 2: iFrame</h3>
+            <p>Embebido usando iframe:</p>
+            <code>&lt;iframe src="https://tu-dominio.vercel.app/widget" width="400" height="600"&gt;&lt;/iframe&gt;</code>
+        </div>
+
+        <div id="status" class="status info">
+            📡 Probando conexión con el widget...
+        </div>
+
+        <div class="example">
+            <h3>🔧 Widget en Acción</h3>
+            <p>El widget aparecerá en la esquina inferior derecha:</p>
+            <div id="widget-container"></div>
+        </div>
+
+        <h2>📋 Instrucciones de Integración</h2>
+        <ol>
+            <li><strong>Reemplaza la URL:</strong> Cambia <code>tu-dominio.vercel.app</code> por tu dominio real</li>
+            <li><strong>Configura CORS:</strong> El widget ya tiene headers CORS configurados</li>
+            <li><strong>Personaliza:</strong> Puedes modificar los estilos del widget según tu necesidad</li>
+        </ol>
+
+        <h2>🚀 URLs de Ejemplo</h2>
+        <ul>
+            <li><strong>Widget Script:</strong> <code>https://tu-dominio.vercel.app/widget.js</code></li>
+            <li><strong>Widget iFrame:</strong> <code>https://tu-dominio.vercel.app/widget</code></li>
+            <li><strong>Aplicación Principal:</strong> <code>https://tu-dominio.vercel.app/</code></li>
+        </ul>
+    </div>
+
+    <!-- Cargar el widget para probarlo -->
+    <script>
+        // Probar carga del widget desde localhost (desarrollo) o dominio desplegado
+        const widgetUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5173/widget.js'
+            : 'https://bot-cocina-gilt.vercel.app/widget.js';
+        
+        console.log('🚀 Cargando widget desde:', widgetUrl);
+        
+        const script = document.createElement('script');
+        script.src = widgetUrl;
+        script.onload = () => {
+            document.getElementById('status').innerHTML = '✅ Widget cargado correctamente';
+            document.getElementById('status').className = 'status success';
+        };
+        script.onerror = () => {
+            document.getElementById('status').innerHTML = '❌ Error al cargar el widget. Verifica la URL y configuración CORS.';
+            document.getElementById('status').className = 'status error';
+        };
+        
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
