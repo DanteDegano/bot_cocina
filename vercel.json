@@ -13,6 +13,10 @@
     {
       "source": "/widget.js",
       "destination": "/widget.js"
+    },
+    {
+      "source": "/chefbot.js",
+      "destination": "/chefbot-client.js"
     }
   ],
   "headers": [
@@ -30,6 +34,23 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type, Authorization"
+        }
+      ]
+    },
+    {
+      "source": "/chefbot.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     },
