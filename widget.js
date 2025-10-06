@@ -1,16 +1,3 @@
-export default function handler(req, res) {
-  // Configurar headers para JavaScript
-  res.setHeader('Content-Type', 'application/javascript');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // API key desde variables de entorno o fallback
-  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || 'AIzaSyCgmDFHK2cmIQJc1friGaSPYJrpKrEsVTM';
-
-  // Widget JavaScript con integración Gemini
-  const widgetCode = `
 console.log('🚀 ChefBot Widget con Gemini iniciando...');
 
 // Verificar si ya está cargado
@@ -54,7 +41,7 @@ if (window.ChefBotLoaded) {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || \`Error del servidor: \${response.status}\`);
+          throw new Error(errorData.error || `Error del servidor: ${response.status}`);
         }
 
         const data = await response.json();
@@ -192,7 +179,3 @@ if (window.ChefBotLoaded) {
 }
 
 console.log('📝 ChefBot con backend seguro cargado completamente');
-`;
-
-  res.send(widgetCode);
-}
