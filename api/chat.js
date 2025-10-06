@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   console.log(`🌐 Request method: ${req.method}, URL: ${req.url}`);
   
   // Headers CORS para permitir embebido desde cualquier dominio

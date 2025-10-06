@@ -1,11 +1,4 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "functions": {
-    "api/chat.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/widget",
@@ -14,10 +7,6 @@
     {
       "source": "/widget.js",
       "destination": "/widget.js"
-    },
-    {
-      "source": "/chefbot.js",
-      "destination": "/chefbot-client.js"
     }
   ],
   "headers": [
